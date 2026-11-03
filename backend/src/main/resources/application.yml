@@ -24,9 +24,9 @@ management:
         include: health,info
 
 paypal:
-  base-url: ${PAYPAL_BASE_URL}
-  client-id: ${PAYPAL_CLIENT_ID}
-  client-secret: ${PAYPAL_CLIENT_SECRET}
+  base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+  client-id: ${PAYPAL_CLIENT_ID:}
+  client-secret: ${PAYPAL_CLIENT_SECRET:}
 
 ai:
   provider: ollama
@@ -34,3 +34,14 @@ ai:
     base-url: http://localhost:11434
     model: qwen3:8b
     timeout-seconds: 120
+
+reconcileiq:
+  data-source: ${RECONCILEIQ_DATA_SOURCE:DEMO_SCENARIOS}
+  ai:
+    provider: ${RECONCILEIQ_AI_PROVIDER:OLLAMA}
+    base-url: ${RECONCILEIQ_AI_BASE_URL:http://localhost:11434}
+    model: ${RECONCILEIQ_AI_MODEL:qwen3:8b}
+    temperature: 0.1
+    timeout-seconds: 60
+    prompt-version: v1
+    api-key: ${RECONCILEIQ_AI_API_KEY:}

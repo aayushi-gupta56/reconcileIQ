@@ -8,8 +8,10 @@ import {
   runReconciliation,
   getReconciliationRuns,
   getReconciliationResults,
+  getAppConfig,
   type ReconciliationRun,
   type ReconciliationResult,
+  type AppConfig,
 } from "./api";
 
 const statusColors: Record<string, string> = {
@@ -43,6 +45,7 @@ export default function ReconciliationDashboard() {
   const [error, setError] = useState("");
   const [selectedResultId, setSelectedResultId] =
   useState<number | null>(null)
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null)
 
   async function loadRuns() {
     const data = await getReconciliationRuns();
@@ -96,6 +99,7 @@ export default function ReconciliationDashboard() {
   }
 
   useEffect(() => {
+    getAppConfig().then(setAppConfig).catch(() => undefined);
     loadRuns().catch((err) => {
       setError(
         err instanceof Error ? err.message : "Failed to load runs"
@@ -112,6 +116,11 @@ export default function ReconciliationDashboard() {
           <p className="subtitle">
             Compare merchant orders against captured PayPal payments.
           </p>
+          {appConfig && (
+            <span className={`source-badge ${appConfig.source.toLowerCase()}`}>
+              {appConfig.label}
+            </span>
+          )}
         </div>
         <button
   className="run-button"
@@ -188,6 +197,7 @@ export default function ReconciliationDashboard() {
                       <th>Expected</th>
                       <th>Actual</th>
                       <th>Status</th>
+                      <th>Source</th>
                       <th>Explanation</th>
                       <th>Action</th>
                     </tr>
@@ -227,6 +237,14 @@ export default function ReconciliationDashboard() {
                             }}
                           >
                             {result.status.replaceAll("_", " ")}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className={`source-badge compact ${
+                            (result.source ?? "DEMO").toLowerCase()
+                          }`}>
+                            {result.source === "SANDBOX" ? "Sandbox" : "Demo"}
                           </span>
                         </td>
 

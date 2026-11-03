@@ -1,6 +1,7 @@
 
 package com.reconcileiq.reconciliation;
 
+import com.reconcileiq.config.ReconcileIqProperties;
 import com.reconcileiq.orders.MerchantOrder;
 import com.reconcileiq.orders.MerchantOrderRepository;
 import com.reconcileiq.paypal.PayPalTransaction;
@@ -23,6 +24,7 @@ public class ReconciliationService {
     private final ReconciliationResultRepository resultRepository;
     private final ReconciliationResultTransactionRepository
             resultTransactionRepository;
+    private final ReconcileIqProperties properties;
 
     public ReconciliationService(
             MerchantOrderRepository merchantOrderRepository,
@@ -30,13 +32,15 @@ public class ReconciliationService {
             ReconciliationRunRepository runRepository,
             ReconciliationResultRepository resultRepository,
             ReconciliationResultTransactionRepository
-                    resultTransactionRepository
+                    resultTransactionRepository,
+            ReconcileIqProperties properties
     ) {
         this.merchantOrderRepository = merchantOrderRepository;
         this.paypalTransactionRepository = paypalTransactionRepository;
         this.runRepository = runRepository;
         this.resultRepository = resultRepository;
         this.resultTransactionRepository = resultTransactionRepository;
+        this.properties = properties;
     }
 
     @Transactional
@@ -165,6 +169,7 @@ public class ReconciliationService {
 
             ReconciliationResult result =
                     reconcileOrder(order, allCandidates, run.getId());
+            tagSource(result);
 
             result = resultRepository.save(result);
 
@@ -206,6 +211,7 @@ public class ReconciliationService {
                               + "merchant references."
                             : "PayPal transaction has no corresponding merchant order."
             );
+            tagSource(result);
 
             result = resultRepository.save(result);
 
@@ -219,6 +225,10 @@ public class ReconciliationService {
         run.setUnmatchedPaymentsCount(unexpectedPayments);
 
         return runRepository.save(run);
+    }
+
+    private void tagSource(ReconciliationResult result) {
+        result.setSource(properties.getDataSource().recordSource());
     }
 
     private void saveTransactionAssociations(

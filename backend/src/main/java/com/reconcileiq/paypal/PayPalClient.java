@@ -28,8 +28,8 @@ public class PayPalClient {
 
     public PayPalClient(
             RestClient paypalRestClient,
-            @Value("${paypal.client-id}") String clientId,
-            @Value("${paypal.client-secret}") String clientSecret) {
+            @Value("${paypal.client-id:}") String clientId,
+            @Value("${paypal.client-secret:}") String clientSecret) {
 
         this.client = paypalRestClient;
         this.clientId = clientId;
@@ -37,6 +37,12 @@ public class PayPalClient {
     }
 
     public String getAccessToken() {
+        if (clientId == null || clientId.isBlank()
+                || clientSecret == null || clientSecret.isBlank()) {
+            throw new IllegalStateException(
+                    "PayPal credentials are not configured. Set PAYPAL_CLIENT_ID and "
+                    + "PAYPAL_CLIENT_SECRET, or run with reconcileiq.data-source=DEMO_SCENARIOS.");
+        }
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "client_credentials");
 

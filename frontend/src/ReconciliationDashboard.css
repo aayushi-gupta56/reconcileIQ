@@ -35,6 +35,32 @@
     color: #64748b;
     margin: 0;
   }
+
+  .source-badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .source-badge.compact {
+    margin-top: 0;
+    font-size: 11px;
+  }
+
+  .source-badge.demo {
+    color: #1d4ed8;
+    background: #dbeafe;
+  }
+
+  .source-badge.sandbox {
+    color: #166534;
+    background: #dcfce7;
+  }
   
   .run-button {
     border: none;

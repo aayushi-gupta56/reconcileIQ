@@ -1,4 +1,16 @@
-const API_BASE_URL = "http://localhost:8080/api/v1";
+const API_BASE_URL = "/api/v1";
+
+export interface AppConfig {
+  dataSource: "DEMO_SCENARIOS" | "LIVE_SANDBOX";
+  source: "DEMO" | "SANDBOX";
+  label: string;
+  paypalConfigured: boolean;
+}
+
+export async function getAppConfig(): Promise<AppConfig> {
+  const response = await fetch("/api/config");
+  return handleResponse<AppConfig>(response);
+}
 
 export interface ReconciliationRun {
   id: number;
@@ -22,6 +34,7 @@ export interface ReconciliationResult {
   status: string;
   matchedTransactionCount: number;
   explanation: string;
+  source: "DEMO" | "SANDBOX" | string;
   createdAt: string;
 }
 
