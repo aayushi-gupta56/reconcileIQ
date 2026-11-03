@@ -6,6 +6,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import InvestigationPanel from "./InvestigationPanel";
 import "./ReconciliationDashboard.css";
+import "./DashboardTabs.css";
 import {
   getAppConfig,
   getReconciliationResults,
@@ -52,7 +53,33 @@ function SourceCell(props: { value: string }) {
   );
 }
 
-export default function ReconciliationDashboard() {
+type Tab = "actual" | "demo";
+
+const TAB_COPY: Record<Tab, { label: string; description: string }> = {
+  actual: {
+    label: "Actual payments",
+    description:
+      "Orders created in this app and paid through the PayPal sandbox. Real API data, no seeded rows.",
+  },
+  demo: {
+    label: "Demo scenarios",
+    description:
+      "Seeded scenarios, one per status, for exploring the investigation workflow. They never call PayPal.",
+  },
+};
+
+function summarise(rows: ReconciliationResult[]) {
+  const unexpected = rows.filter((r) => r.status === "UNEXPECTED_PAYMENT").length;
+  const matched = rows.filter((r) => r.status === "MATCHED").length;
+  const orders = rows.filter(
+    (r) => r.merchantOrderId != null && r.status !== "UNEXPECTED_PAYMENT"
+  ).length;
+  return { orders, matched, discrepancies: orders - matched, unexpected };
+}
+
+type Props = { onCreateOrder?: () => void };
+
+export default function ReconciliationDashboard({ onCreateOrder }: Props) {
   const [runs, setRuns] = useState<ReconciliationRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<ReconciliationRun | null>(null);
   const [results, setResults] = useState<ReconciliationResult[]>([]);
@@ -60,6 +87,31 @@ export default function ReconciliationDashboard() {
   const [error, setError] = useState("");
   const [selectedResult, setSelectedResult] = useState<ReconciliationResult | null>(null);
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab | null>(null);
+
+  // Until the user picks a tab, follow the backend mode:
+  // demo mode opens on demo scenarios, live mode opens on actual payments.
+  const tab: Tab =
+    activeTab ?? (appConfig?.dataSource === "LIVE_SANDBOX" ? "actual" : "demo");
+
+  const demoResults = useMemo(
+    () => results.filter((row) => row.source === "DEMO"),
+    [results]
+  );
+  const actualResults = useMemo(
+    () => results.filter((row) => row.source !== "DEMO"),
+    [results]
+  );
+  const visibleResults = tab === "demo" ? demoResults : actualResults;
+
+  const stats = useMemo(() => summarise(visibleResults), [visibleResults]);
+  const demoStats = useMemo(() => summarise(demoResults), [demoResults]);
+  const actualStats = useMemo(() => summarise(actualResults), [actualResults]);
+
+  function selectTab(next: Tab) {
+    setActiveTab(next);
+    setSelectedResult(null);
+  }
 
   const columnDefs = useMemo<ColDef<ReconciliationResult>[]>(
     () => [
@@ -144,11 +196,6 @@ export default function ReconciliationDashboard() {
           <p className="subtitle">
             Compare merchant orders against captured PayPal payments.
           </p>
-          {appConfig && (
-            <span className={`source-badge ${appConfig.source.toLowerCase()}`}>
-              {appConfig.label}
-            </span>
-          )}
         </div>
         <button className="run-button" onClick={() => (window.location.href = "/")}>
           ← Back to home
@@ -160,12 +207,38 @@ export default function ReconciliationDashboard() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      <div className="dashboard-tabs" role="tablist">
+        {(["actual", "demo"] as Tab[]).map((key) => {
+          const tabStats = key === "demo" ? demoStats : actualStats;
+          const needsAttention = tabStats.discrepancies + tabStats.unexpected;
+          const total = key === "demo" ? demoResults.length : actualResults.length;
+          return (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={tab === key}
+              className={`dashboard-tab ${tab === key ? "active" : ""}`}
+              onClick={() => selectTab(key)}
+            >
+              {TAB_COPY[key].label}
+              <span className="tab-count">{total}</span>
+              {needsAttention > 0 && (
+                <span className="tab-count alert" title="Need attention">
+                  {needsAttention}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <p className="tab-description">{TAB_COPY[tab].description}</p>
+
       {selectedRun && (
         <section className="summary-grid">
-          <SummaryCard label="Total orders" value={selectedRun.totalOrders} />
-          <SummaryCard label="Matched" value={selectedRun.matchedCount} color="#16a34a" />
-          <SummaryCard label="Discrepancies" value={selectedRun.discrepancyCount} color="#dc2626" />
-          <SummaryCard label="Unexpected payments" value={selectedRun.unmatchedPaymentsCount} color="#d97706" />
+          <SummaryCard label="Total orders" value={stats.orders} />
+          <SummaryCard label="Matched" value={stats.matched} color="#16a34a" />
+          <SummaryCard label="Discrepancies" value={stats.discrepancies} color="#dc2626" />
+          <SummaryCard label="Unexpected payments" value={stats.unexpected} color="#d97706" />
         </section>
       )}
 
@@ -173,27 +246,36 @@ export default function ReconciliationDashboard() {
         <section className="results-section">
           <div className="section-heading">
             <div>
-              <h2>Discrepancies</h2>
+              <h2>{TAB_COPY[tab].label}</h2>
               <p>
                 {selectedRun
                   ? `Run #${selectedRun.id} · ${new Date(selectedRun.startedAt).toLocaleString()}`
                   : "Run reconciliation to load rows."}
               </p>
             </div>
-            <span className="result-count">{results.length} records</span>
+            <span className="result-count">{visibleResults.length} records</span>
           </div>
-          <div className="ag-theme-quartz results-grid">
-            <AgGridReact<ReconciliationResult>
-              rowData={results}
-              columnDefs={columnDefs}
-              defaultColDef={{ resizable: true, filter: true, sortable: true }}
-              rowSelection="single"
-              animateRows
-              onRowClicked={(event: RowClickedEvent<ReconciliationResult>) => {
-                if (event.data) setSelectedResult(event.data);
-              }}
+          {visibleResults.length === 0 ? (
+            <EmptyState
+              tab={tab}
+              hasRun={selectedRun !== null}
+              paypalConfigured={appConfig?.paypalConfigured}
+              onCreateOrder={onCreateOrder}
             />
-          </div>
+          ) : (
+            <div className="ag-theme-quartz results-grid">
+              <AgGridReact<ReconciliationResult>
+                rowData={visibleResults}
+                columnDefs={columnDefs}
+                defaultColDef={{ resizable: true, filter: true, sortable: true }}
+                rowSelection="single"
+                animateRows
+                onRowClicked={(event: RowClickedEvent<ReconciliationResult>) => {
+                  if (event.data) setSelectedResult(event.data);
+                }}
+              />
+            </div>
+          )}
         </section>
         <InvestigationPanel
           result={selectedResult}
@@ -247,6 +329,61 @@ function SummaryCard({
     <div className="summary-card">
       <p>{label}</p>
       <strong style={{ color }}>{value}</strong>
+    </div>
+  );
+}
+
+function EmptyState({
+  tab,
+  hasRun,
+  paypalConfigured,
+  onCreateOrder,
+}: {
+  tab: Tab;
+  hasRun: boolean;
+  paypalConfigured?: boolean;
+  onCreateOrder?: () => void;
+}) {
+  if (!hasRun) {
+    return (
+      <div className="empty-state">
+        <h3>No reconciliation run yet</h3>
+        <p>Click “Run reconciliation” to compare merchant orders with PayPal captures.</p>
+      </div>
+    );
+  }
+
+  if (tab === "demo") {
+    return (
+      <div className="empty-state">
+        <h3>No demo scenarios in this run</h3>
+        <p>
+          Demo scenarios are seeded when the backend starts with
+          reconcileiq.data-source=DEMO_SCENARIOS. Start it in that mode, then run
+          reconciliation again.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="empty-state">
+      <h3>No actual payments reconciled yet</h3>
+      <p>
+        Create a merchant order, approve it in the PayPal sandbox, then run
+        reconciliation again.
+      </p>
+      {paypalConfigured === false && (
+        <p className="empty-warning">
+          PayPal credentials are not configured on the backend. Set PAYPAL_CLIENT_ID
+          and PAYPAL_CLIENT_SECRET and restart it.
+        </p>
+      )}
+      {onCreateOrder && (
+        <button className="run-button" onClick={onCreateOrder}>
+          Create merchant order →
+        </button>
+      )}
     </div>
   );
 }

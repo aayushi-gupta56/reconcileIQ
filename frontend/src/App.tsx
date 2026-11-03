@@ -39,7 +39,14 @@ export default function App() {
   }
 
   if (showDashboard) {
-    return <ReconciliationDashboard />
+    return (
+      <ReconciliationDashboard
+        onCreateOrder={() => {
+          setShowDashboard(false)
+          setShowCreateOrder(true)
+        }}
+      />
+    )
   }
 
   if (showCreateOrder) {

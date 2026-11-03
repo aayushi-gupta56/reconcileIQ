@@ -57,6 +57,21 @@ public class DemoScenarioSeeder implements ApplicationRunner {
         log.info("Demo scenarios are present (idempotent seed).");
     }
 
+    /**
+     * True when a reconciliation record belongs to the seeded demo scenarios.
+     * Real orders use ORD-... ids, so origin (not the active mode) decides the tab.
+     */
+    public static boolean isDemoRecord(
+            String merchantOrderId, String paypalOrderId, String captureId) {
+        return startsWith(merchantOrderId, "DEMO-")
+                || startsWith(paypalOrderId, "PP-DEMO-")
+                || startsWith(captureId, "CAP-DEMO-");
+    }
+
+    private static boolean startsWith(String value, String prefix) {
+        return value != null && value.startsWith(prefix);
+    }
+
     private void seedMatched() {
         upsertOrder("DEMO-MATCHED", "100.00", "USD", "PP-DEMO-MATCHED");
         upsertCapture("PP-DEMO-MATCHED", "CAP-DEMO-MATCHED", "DEMO-MATCHED",

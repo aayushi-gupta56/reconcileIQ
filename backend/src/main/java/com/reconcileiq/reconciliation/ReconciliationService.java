@@ -2,6 +2,7 @@
 package com.reconcileiq.reconciliation;
 
 import com.reconcileiq.config.ReconcileIqProperties;
+import com.reconcileiq.demo.DemoScenarioSeeder;
 import com.reconcileiq.orders.MerchantOrder;
 import com.reconcileiq.orders.MerchantOrderRepository;
 import com.reconcileiq.paypal.PayPalTransaction;
@@ -228,7 +229,11 @@ public class ReconciliationService {
     }
 
     private void tagSource(ReconciliationResult result) {
-        result.setSource(properties.getDataSource().recordSource());
+        boolean demo = DemoScenarioSeeder.isDemoRecord(
+                result.getMerchantOrderId(),
+                result.getPaypalOrderId(),
+                result.getCaptureId());
+        result.setSource(demo ? "DEMO" : "SANDBOX");
     }
 
     private void saveTransactionAssociations(
