@@ -13,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,6 +68,22 @@ public class PayPalClient {
             String merchantOrderId,
             BigDecimal amount,
             String currency) {
+        return createOrder(
+                merchantOrderId,
+                amount,
+                currency,
+                merchantOrderId,
+                null,
+                UUID.randomUUID().toString());
+    }
+
+    public PayPalOrderResult createOrder(
+            String merchantOrderId,
+            BigDecimal amount,
+            String currency,
+            String customId,
+            String invoiceId,
+            String paypalRequestId) {
 
         String accessToken = getAccessToken();
 
@@ -75,11 +92,13 @@ public class PayPalClient {
                 "value", amount.setScale(2).toPlainString()
         );
 
-        Map<String, Object> purchaseUnit = Map.of(
-                "reference_id", merchantOrderId,
-                "custom_id", merchantOrderId,
-                "amount", amountDetails
-        );
+        Map<String, Object> purchaseUnit = new LinkedHashMap<>();
+        purchaseUnit.put("reference_id", merchantOrderId);
+        purchaseUnit.put("custom_id", customId == null ? merchantOrderId : customId);
+        if (invoiceId != null && !invoiceId.isBlank()) {
+            purchaseUnit.put("invoice_id", invoiceId);
+        }
+        purchaseUnit.put("amount", amountDetails);
 
         Map<String, Object> request = Map.of(
                 "intent", "CAPTURE",
@@ -103,7 +122,9 @@ public class PayPalClient {
                     headers.setBearerAuth(accessToken);
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.set("PayPal-Request-Id",
-                            UUID.randomUUID().toString());
+                            paypalRequestId == null || paypalRequestId.isBlank()
+                                    ? UUID.randomUUID().toString()
+                                    : paypalRequestId);
                 })
                 .body(request)
                 .retrieve()
@@ -169,6 +190,25 @@ public class PayPalClient {
     
             throw e;
         }
+    }
+
+    /**
+     * Transaction Search requires the feature on the REST app and can lag
+     * up to three hours after capture. Callers should treat 403 as "not enabled".
+     */
+    public JsonNode searchTransactions(String startIso, String endIso) {
+        String accessToken = getAccessToken();
+        return client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/v1/reporting/transactions")
+                        .queryParam("start_date", startIso)
+                        .queryParam("end_date", endIso)
+                        .queryParam("fields", "all")
+                        .queryParam("page_size", "100")
+                        .build())
+                .headers(headers -> headers.setBearerAuth(accessToken))
+                .retrieve()
+                .body(JsonNode.class);
     }
 
     public JsonNode getOrder(String paypalOrderId) {

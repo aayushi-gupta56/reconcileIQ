@@ -36,6 +36,9 @@ export interface ReconciliationResult {
   explanation: string;
   source: "DEMO" | "SANDBOX" | string;
   createdAt: string;
+  reviewStatus: string | null;
+  investigationId: number | null;
+  validationStatus: string | null;
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -43,7 +46,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const message = await response.text();
     throw new Error(message || `Request failed: ${response.status}`);
   }
-
   return response.json() as Promise<T>;
 }
 
@@ -51,13 +53,11 @@ export async function runReconciliation(): Promise<ReconciliationRun> {
   const response = await fetch(`${API_BASE_URL}/reconciliation/run`, {
     method: "POST",
   });
-
   return handleResponse<ReconciliationRun>(response);
 }
 
 export async function getReconciliationRuns(): Promise<ReconciliationRun[]> {
   const response = await fetch(`${API_BASE_URL}/reconciliation/runs`);
-
   return handleResponse<ReconciliationRun[]>(response);
 }
 
@@ -67,37 +67,36 @@ export async function getReconciliationResults(
   const response = await fetch(
     `${API_BASE_URL}/reconciliation/runs/${runId}/results`
   );
-
   return handleResponse<ReconciliationResult[]>(response);
 }
 
 export type InvestigationReport = {
-  id: number
-  reconciliationResultId: number
-  likelyCause: string
-  confidence: number
-  evidence: string
-  recommendedAction: string
-  requiresHumanReview: boolean
-  modelName: string
-  status: string
-  createdAt: string
-}
+  id: number;
+  reconciliationResultId: number;
+  summary: string;
+  possibleExplanations: string[];
+  observedFacts: string[];
+  recommendedChecks: string[];
+  requiresHumanReview: boolean;
+  modelName: string;
+  promptVersion: string | null;
+  status: string;
+  validationStatus: string;
+  latencyMs: number | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
+  createdAt: string;
+};
 
 export async function investigateResult(
   resultId: number
 ): Promise<InvestigationReport> {
   const response = await fetch(
     `/api/v1/reconciliation/results/${resultId}/investigate`,
-    { method: 'POST' }
-  )
-
-  if (!response.ok) {
-    const message = await response.text()
-    throw new Error(message || 'Failed to investigate discrepancy')
-  }
-
-  return response.json()
+    { method: "POST" }
+  );
+  return handleResponse<InvestigationReport>(response);
 }
 
 export async function getInvestigations(
@@ -105,10 +104,68 @@ export async function getInvestigations(
 ): Promise<InvestigationReport[]> {
   const response = await fetch(
     `/api/v1/reconciliation/results/${resultId}/investigations`
-  )
+  );
+  return handleResponse<InvestigationReport[]>(response);
+}
+
+export async function reviewInvestigation(
+  id: number,
+  action: "approve" | "dismiss" | "needs-info",
+  reviewer: string,
+  note: string
+): Promise<InvestigationReport> {
+  const response = await fetch(`/api/investigations/${id}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reviewer, note }),
+  });
+  return handleResponse<InvestigationReport>(response);
+}
+
+// ---------- Merchant orders ----------
+
+export type MerchantOrder = {
+  merchantOrderId: string
+  expectedAmount: number
+  currency: string
+  status: string
+  paypalOrderId: string | null
+  approvalUrl: string | null
+  createdAt: string
+}
+
+async function readError(response: Response, fallback: string): Promise<string> {
+  const text = await response.text()
+  try {
+    const data = JSON.parse(text)
+    return data.error || data.message || fallback
+  } catch {
+    return text || fallback
+  }
+}
+
+export async function createMerchantOrder(
+  amount: number,
+  currency: string
+): Promise<MerchantOrder> {
+  const response = await fetch('/api/v1/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, currency }),
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch investigation history')
+    throw new Error(await readError(response, 'Failed to create order'))
+  }
+
+  return response.json()
+}
+
+export async function listMerchantOrders(): Promise<MerchantOrder[]> {
+  const response = await fetch('/api/v1/orders')
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Failed to load orders'))
   }
 
   return response.json()

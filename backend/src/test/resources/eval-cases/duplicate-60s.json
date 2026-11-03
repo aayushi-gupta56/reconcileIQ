@@ -1,0 +1,17 @@
+{
+  "id": "duplicate-60s",
+  "status": "DUPLICATE_PAYMENT",
+  "merchantOrderId": "DEMO-DUP",
+  "paypalOrderId": "PP-DEMO-DUP",
+  "expectedAmount": "75.00",
+  "actualAmount": "150.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 2,
+  "explanation": "Multiple PayPal transactions were associated with this merchant order.",
+  "evidence": [
+    {"captureId":"CAP-DEMO-DUP-A","paypalOrderId":"PP-DEMO-DUP","merchantOrderId":"DEMO-DUP","amount":"75.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:05:00"},
+    {"captureId":"CAP-DEMO-DUP-B","paypalOrderId":"PP-DEMO-DUP","merchantOrderId":"DEMO-DUP","amount":"75.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:06:00"}
+  ],
+  "modelOutput": "{\"summary\":\"2 transactions in the dataset matched merchant order DEMO-DUP.\",\"possibleExplanations\":[\"Identical amounts captured 60 seconds apart may indicate a retried checkout.\"],\"recommendedChecks\":[\"Confirm in the PayPal dashboard that CAP-DEMO-DUP-A and CAP-DEMO-DUP-B are both separate captures\",\"Check application logs for capture requests sent for order DEMO-DUP\",\"Check webhook delivery logs for repeated events for CAP-DEMO-DUP-A\",\"Check the customer's payment records for two charges\"],\"requiresHumanReview\":true}"
+}

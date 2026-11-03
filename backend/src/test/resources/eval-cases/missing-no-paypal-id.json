@@ -1,0 +1,11 @@
+{
+  "id": "missing-no-paypal-id",
+  "status": "MISSING_PAYMENT",
+  "merchantOrderId": "MO-EMPTY-PP",
+  "expectedAmount": "55.00",
+  "expectedCurrency": "USD",
+  "matchedTransactionCount": 0,
+  "explanation": "No PayPal transaction was found for this merchant order.",
+  "evidence": [],
+  "modelOutput": "{\"summary\":\"No payment record matching merchant order MO-EMPTY-PP was found.\",\"possibleExplanations\":[\"Root cause cannot be determined from the available evidence.\"],\"recommendedChecks\":[\"Search PayPal by merchant reference MO-EMPTY-PP\",\"Check abandoned-checkout records in the merchant system\",\"Check ingestion job logs for this order's time window\"],\"requiresHumanReview\":true}"
+}

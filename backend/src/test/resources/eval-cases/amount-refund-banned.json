@@ -1,0 +1,17 @@
+{
+  "id": "amount-refund-banned",
+  "status": "AMOUNT_MISMATCH",
+  "merchantOrderId": "MO-AMT-2",
+  "paypalOrderId": "PP-AMT-2",
+  "captureId": "CAP-AMT-2",
+  "expectedAmount": "80.00",
+  "actualAmount": "70.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "Expected amount differs from the captured PayPal amount.",
+  "evidence": [
+    {"captureId":"CAP-AMT-2","paypalOrderId":"PP-AMT-2","merchantOrderId":"MO-AMT-2","amount":"70.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:10:00"}
+  ],
+  "modelOutput": "{\"summary\":\"Refund the buyer for order A2.\",\"possibleExplanations\":[\"A discount may apply.\"],\"recommendedChecks\":[\"Refund 10.00 USD\",\"List every capture ID\",\"Compare timestamps and amounts\",\"Void the payment\"],\"requiresHumanReview\":true}"
+}

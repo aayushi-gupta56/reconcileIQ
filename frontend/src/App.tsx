@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import PaymentReturn from "./PaymentReturn"
 import ReconciliationDashboard from "./ReconciliationDashboard"
 import "./ReconciliationDashboard.css"
+import CreateOrder from "./CreateOrder"
 
 type Health = { status: string; application: string }
 
@@ -9,6 +10,7 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
   const [apiError, setApiError] = useState('')
   const [showDashboard, setShowDashboard] = useState(false)
+  const [showCreateOrder, setShowCreateOrder] = useState(false)
 
   useEffect(() => {
     fetch('/api/v1/health')
@@ -40,6 +42,10 @@ export default function App() {
     return <ReconciliationDashboard />
   }
 
+  if (showCreateOrder) {
+    return <CreateOrder onBack={() => setShowCreateOrder(false)} />
+  }
+
   return (
     <main className="shell">
       <nav className="topbar">
@@ -63,12 +69,14 @@ export default function App() {
           </div>
         </div>
 
-        <button
-          className="run-button"
-          onClick={() => setShowDashboard(true)}
-        >
-          Open reconciliation dashboard →
-        </button>
+        <div className="hero-actions">
+        <button className="run-button" onClick={() => setShowDashboard(true)}>
+    Open reconciliation dashboard →
+  </button>
+  <button className="run-button secondary" onClick={() => setShowCreateOrder(true)}>
+    Create merchant order →
+  </button>
+</div>
       </section>
 
       <section className="grid">
@@ -76,21 +84,21 @@ export default function App() {
           <span className="feature-number">01</span>
           <h2>Reconcile</h2>
           <p>Compare ledger entries with payment-provider records using deterministic rules.</p>
-          <span className="pill">IN PROGRESS</span>
+          <span className="pill">READY</span>
         </article>
 
         <article className="feature">
           <span className="feature-number">02</span>
           <h2>Investigate</h2>
           <p>Use evidence-backed AI explanations to help humans resolve exceptions faster.</p>
-          <span className="pill muted">PLANNED</span>
+          <span className="pill">READY</span>
         </article>
 
         <article className="feature">
           <span className="feature-number">03</span>
           <h2>Audit</h2>
           <p>Track review decisions and export a traceable record of every resolution.</p>
-          <span className="pill muted">PLANNED</span>
+          <span className="pill">READY</span>
         </article>
       </section>
 

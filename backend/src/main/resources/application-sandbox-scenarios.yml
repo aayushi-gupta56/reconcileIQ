@@ -1,0 +1,6 @@
+spring:
+  main:
+    web-application-type: none
+
+reconcileiq:
+  data-source: LIVE_SANDBOX

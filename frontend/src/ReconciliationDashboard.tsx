@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import type { ColDef, RowClickedEvent } from "ag-grid-community";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 
-import InvestigationPanel from './InvestigationPanel'
-
-import './ReconciliationDashboard.css'
-
+import InvestigationPanel from "./InvestigationPanel";
+import "./ReconciliationDashboard.css";
 import {
-  runReconciliation,
-  getReconciliationRuns,
-  getReconciliationResults,
   getAppConfig,
-  type ReconciliationRun,
-  type ReconciliationResult,
+  getReconciliationResults,
+  getReconciliationRuns,
+  runReconciliation,
   type AppConfig,
+  type ReconciliationResult,
+  type ReconciliationRun,
 } from "./api";
 
 const statusColors: Record<string, string> = {
@@ -24,87 +26,113 @@ const statusColors: Record<string, string> = {
   UNEXPECTED_PAYMENT: "#dc2626",
 };
 
-function formatAmount(
-  amount: number | null,
-  currency: string | null
-) {
+function formatAmount(amount: number | null, currency: string | null) {
   if (amount === null || currency === null) return "-";
+  return `${Number(amount).toFixed(2)} ${currency}`;
+}
 
-  return `${amount.toFixed(2)} ${currency}`;
+function StatusCell(props: { value: string }) {
+  const color = statusColors[props.value] ?? "#64748b";
+  return (
+    <span
+      className="status"
+      style={{ color, background: `${color}18` }}
+    >
+      {(props.value ?? "").replaceAll("_", " ")}
+    </span>
+  );
+}
+
+function SourceCell(props: { value: string }) {
+  const source = props.value === "SANDBOX" ? "Sandbox" : "Demo";
+  return (
+    <span className={`source-badge compact ${source.toLowerCase()}`}>
+      {source}
+    </span>
+  );
 }
 
 export default function ReconciliationDashboard() {
   const [runs, setRuns] = useState<ReconciliationRun[]>([]);
-  const [selectedRun, setSelectedRun] =
-    useState<ReconciliationRun | null>(null);
-
+  const [selectedRun, setSelectedRun] = useState<ReconciliationRun | null>(null);
   const [results, setResults] = useState<ReconciliationResult[]>([]);
-
   const [loading, setLoading] = useState(false);
-  const [loadingResults, setLoadingResults] = useState(false);
   const [error, setError] = useState("");
-  const [selectedResultId, setSelectedResultId] =
-  useState<number | null>(null)
-  const [appConfig, setAppConfig] = useState<AppConfig | null>(null)
+  const [selectedResult, setSelectedResult] = useState<ReconciliationResult | null>(null);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
 
-  async function loadRuns() {
-    const data = await getReconciliationRuns();
+  const columnDefs = useMemo<ColDef<ReconciliationResult>[]>(
+    () => [
+      { field: "merchantOrderId", headerName: "Merchant order", filter: true, sortable: true, flex: 1 },
+      { field: "paypalOrderId", headerName: "PayPal order", filter: true, sortable: true, flex: 1 },
+      { field: "status", headerName: "Status", filter: true, sortable: true, cellRenderer: StatusCell, width: 180 },
+      {
+        headerName: "Expected",
+        filter: true,
+        sortable: true,
+        valueGetter: (params) =>
+          formatAmount(params.data?.expectedAmount ?? null, params.data?.expectedCurrency ?? null),
+      },
+      {
+        headerName: "Actual",
+        filter: true,
+        sortable: true,
+        valueGetter: (params) =>
+          formatAmount(params.data?.actualAmount ?? null, params.data?.actualCurrency ?? null),
+      },
+      { field: "expectedCurrency", headerName: "Currency", filter: true, sortable: true, width: 110 },
+      { field: "source", headerName: "Source", filter: true, sortable: true, cellRenderer: SourceCell, width: 120 },
+      { field: "reviewStatus", headerName: "Review", filter: true, sortable: true, width: 150 },
+      { field: "createdAt", headerName: "Created", filter: true, sortable: true, width: 180 },
+    ],
+    []
+  );
 
-    setRuns(data);
-
-    if (data.length > 0 && !selectedRun) {
-      await selectRun(data[0]);
-    }
+  async function loadResults(run: ReconciliationRun) {
+    const data = await getReconciliationResults(run.id);
+    setResults(data);
+    setSelectedResult((current) =>
+      current ? data.find((row) => row.id === current.id) ?? current : null
+    );
   }
 
   async function selectRun(run: ReconciliationRun) {
     setSelectedRun(run);
-    setLoadingResults(true);
     setError("");
-
     try {
-      const data = await getReconciliationResults(run.id);
-      setResults(data);
+      await loadResults(run);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load results"
-      );
-    } finally {
-      setLoadingResults(false);
+      setError(err instanceof Error ? err.message : "Failed to load results");
     }
   }
 
   async function handleRunReconciliation() {
     setLoading(true);
     setError("");
-
     try {
       const run = await runReconciliation();
-
       setRuns((previous) => [run, ...previous]);
       setSelectedRun(run);
-
-      const data = await getReconciliationResults(run.id);
-      setResults(data);
+      await loadResults(run);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Reconciliation failed"
-      );
+      setError(err instanceof Error ? err.message : "Reconciliation failed");
     } finally {
       setLoading(false);
-      setLoadingResults(false);
     }
   }
 
   useEffect(() => {
     getAppConfig().then(setAppConfig).catch(() => undefined);
-    loadRuns().catch((err) => {
-      setError(
-        err instanceof Error ? err.message : "Failed to load runs"
-      );
-    });
+    getReconciliationRuns()
+      .then(async (data) => {
+        setRuns(data);
+        if (data.length > 0) {
+          await selectRun(data[0]);
+        }
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load runs");
+      });
   }, []);
 
   return (
@@ -122,18 +150,10 @@ export default function ReconciliationDashboard() {
             </span>
           )}
         </div>
-        <button
-  className="run-button"
-  onClick={() => window.location.href = "/"}
->
-  ← Back to home
-</button>
-
-        <button
-          className="run-button"
-          onClick={handleRunReconciliation}
-          disabled={loading}
-        >
+        <button className="run-button" onClick={() => (window.location.href = "/")}>
+          ← Back to home
+        </button>
+        <button className="run-button" onClick={handleRunReconciliation} disabled={loading}>
           {loading ? "Running..." : "↻ Run reconciliation"}
         </button>
       </header>
@@ -141,155 +161,53 @@ export default function ReconciliationDashboard() {
       {error && <div className="error-banner">{error}</div>}
 
       {selectedRun && (
-        <>
-          <section className="summary-grid">
-            <SummaryCard
-              label="Total orders"
-              value={selectedRun.totalOrders}
-            />
-
-            <SummaryCard
-              label="Matched"
-              value={selectedRun.matchedCount}
-              color="#16a34a"
-            />
-
-            <SummaryCard
-              label="Discrepancies"
-              value={selectedRun.discrepancyCount}
-              color="#dc2626"
-            />
-
-            <SummaryCard
-              label="Unexpected payments"
-              value={selectedRun.unmatchedPaymentsCount}
-              color="#d97706"
-            />
-          </section>
-
-          <section className="results-section">
-            <div className="section-heading">
-              <div>
-                <h2>Transaction results</h2>
-                <p>
-                  Run #{selectedRun.id} ·{" "}
-                  {new Date(selectedRun.startedAt).toLocaleString()}
-                </p>
-              </div>
-              <span className="result-count">
-                {results.length} records
-              </span>
-            </div>
-
-            {loadingResults ? (
-              <p>Loading results...</p>
-            ) : results.length === 0 ? (
-              <div className="empty-state">
-                No reconciliation results found for this run.
-              </div>
-            ) : (
-              <div className="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Merchant order</th>
-                      <th>PayPal order</th>
-                      <th>Expected</th>
-                      <th>Actual</th>
-                      <th>Status</th>
-                      <th>Source</th>
-                      <th>Explanation</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {results.map((result) => (
-                      <tr key={result.id}>
-                        <td>{result.merchantOrderId ?? "-"}</td>
-
-                        <td className="paypal-id">
-                          {result.paypalOrderId ?? "-"}
-                        </td>
-
-                        <td>
-                          {formatAmount(
-                            result.expectedAmount,
-                            result.expectedCurrency
-                          )}
-                        </td>
-
-                        <td>
-                          {formatAmount(
-                            result.actualAmount,
-                            result.actualCurrency
-                          )}
-                        </td>
-
-                        <td>
-                          <span
-                            className="status"
-                            style={{
-                              color:
-                                statusColors[result.status] ?? "#64748b",
-                              background:
-                                `${statusColors[result.status] ?? "#64748b"}18`,
-                            }}
-                          >
-                            {result.status.replaceAll("_", " ")}
-                          </span>
-                        </td>
-
-                        <td>
-                          <span className={`source-badge compact ${
-                            (result.source ?? "DEMO").toLowerCase()
-                          }`}>
-                            {result.source === "SANDBOX" ? "Sandbox" : "Demo"}
-                          </span>
-                        </td>
-
-                        <td className="explanation">
-                          {result.explanation}
-                        </td>
-                        <td className="action">
-                        <button
-  className="investigate-button"
-  onClick={() => setSelectedResultId(result.id)}
-  disabled={result.status === 'MATCHED'}
->
-  Investigate
-</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </>
-      )}
-
-      {!selectedRun && !loading && (
-        <section className="empty-state">
-          <h2>No reconciliation runs yet</h2>
-          <p>
-            Trigger your first run to compare merchant orders and PayPal
-            transactions.
-          </p>
+        <section className="summary-grid">
+          <SummaryCard label="Total orders" value={selectedRun.totalOrders} />
+          <SummaryCard label="Matched" value={selectedRun.matchedCount} color="#16a34a" />
+          <SummaryCard label="Discrepancies" value={selectedRun.discrepancyCount} color="#dc2626" />
+          <SummaryCard label="Unexpected payments" value={selectedRun.unmatchedPaymentsCount} color="#d97706" />
         </section>
       )}
 
-{selectedResultId !== null && (
-  <InvestigationPanel
-    resultId={selectedResultId}
-    onClose={() => setSelectedResultId(null)}
-  />
-)}
+      <div className="workspace">
+        <section className="results-section">
+          <div className="section-heading">
+            <div>
+              <h2>Discrepancies</h2>
+              <p>
+                {selectedRun
+                  ? `Run #${selectedRun.id} · ${new Date(selectedRun.startedAt).toLocaleString()}`
+                  : "Run reconciliation to load rows."}
+              </p>
+            </div>
+            <span className="result-count">{results.length} records</span>
+          </div>
+          <div className="ag-theme-quartz results-grid">
+            <AgGridReact<ReconciliationResult>
+              rowData={results}
+              columnDefs={columnDefs}
+              defaultColDef={{ resizable: true, filter: true, sortable: true }}
+              rowSelection="single"
+              animateRows
+              onRowClicked={(event: RowClickedEvent<ReconciliationResult>) => {
+                if (event.data) setSelectedResult(event.data);
+              }}
+            />
+          </div>
+        </section>
+        <InvestigationPanel
+          result={selectedResult}
+          onClose={() => setSelectedResult(null)}
+          onReviewed={() => {
+            if (selectedRun) {
+              loadResults(selectedRun).catch(() => undefined);
+            }
+          }}
+        />
+      </div>
 
       <section className="history-section">
         <h2>Previous runs</h2>
-
         {runs.length === 0 ? (
           <p>No previous runs.</p>
         ) : (
@@ -297,21 +215,15 @@ export default function ReconciliationDashboard() {
             {runs.map((run) => (
               <button
                 key={run.id}
-                className={`run-item ${
-                  selectedRun?.id === run.id ? "active" : ""
-                }`}
+                className={`run-item ${selectedRun?.id === run.id ? "active" : ""}`}
                 onClick={() => selectRun(run)}
               >
                 <span>
                   <strong>Run #{run.id}</strong>
-                  <small>
-                    {new Date(run.startedAt).toLocaleString()}
-                  </small>
+                  <small>{new Date(run.startedAt).toLocaleString()}</small>
                 </span>
-
                 <span>
-                  {run.matchedCount} matched ·{" "}
-                  {run.discrepancyCount} discrepancies
+                  {run.matchedCount} matched · {run.discrepancyCount} discrepancies
                 </span>
               </button>
             ))}

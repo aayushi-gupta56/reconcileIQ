@@ -1,0 +1,14 @@
+{
+  "id": "unexpected-basic",
+  "status": "UNEXPECTED_PAYMENT",
+  "paypalOrderId": "PP-DEMO-UNEXPECTED",
+  "captureId": "CAP-DEMO-UNEXPECTED",
+  "actualAmount": "40.00",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "PayPal transaction has no corresponding merchant order.",
+  "evidence": [
+    {"captureId":"CAP-DEMO-UNEXPECTED","paypalOrderId":"PP-DEMO-UNEXPECTED","amount":"40.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:03:00"}
+  ],
+  "modelOutput": "{\"summary\":\"PayPal order PP-DEMO-UNEXPECTED has no corresponding merchant order in the supplied dataset.\",\"possibleExplanations\":[\"The merchant order may be missing from order ingestion.\"],\"recommendedChecks\":[\"Open PP-DEMO-UNEXPECTED and CAP-DEMO-UNEXPECTED in PayPal and read custom_id\",\"Search order ingestion records for that reference\",\"Check order ingestion job logs for failures around the capture time\",\"Check whether another store uses the same PayPal account\"],\"requiresHumanReview\":true}"
+}

@@ -102,6 +102,18 @@
     font-size: 30px;
   }
   
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .results-grid {
+    height: 520px;
+    width: 100%;
+  }
+
   .results-section,
   .history-section {
     margin-top: 32px;
@@ -239,6 +251,10 @@
     .summary-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .workspace {
+      grid-template-columns: 1fr;
+    }
   }
   
   @media (max-width: 450px) {
@@ -252,7 +268,7 @@
     }
   }
 
-  v.investigate-button {
+  .investigate-button {
     padding: 7px 12px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;

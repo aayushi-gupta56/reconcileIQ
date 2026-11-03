@@ -1,0 +1,18 @@
+{
+  "id": "duplicate-3-captures",
+  "status": "DUPLICATE_PAYMENT",
+  "merchantOrderId": "MO-DUP-3",
+  "paypalOrderId": "PP-DUP-3",
+  "expectedAmount": "20.00",
+  "actualAmount": "60.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 3,
+  "explanation": "Multiple PayPal transactions were associated with this merchant order.",
+  "evidence": [
+    {"captureId":"CAP-D3-A","paypalOrderId":"PP-DUP-3","merchantOrderId":"MO-DUP-3","amount":"20.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T15:00:00"},
+    {"captureId":"CAP-D3-B","paypalOrderId":"PP-DUP-3","merchantOrderId":"MO-DUP-3","amount":"20.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T15:00:05"},
+    {"captureId":"CAP-D3-C","paypalOrderId":"PP-DUP-3","merchantOrderId":"MO-DUP-3","amount":"25.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T15:00:10"}
+  ],
+  "modelOutput": "not-json"
+}

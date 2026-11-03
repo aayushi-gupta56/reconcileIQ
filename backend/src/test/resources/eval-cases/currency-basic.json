@@ -1,0 +1,17 @@
+{
+  "id": "currency-basic",
+  "status": "CURRENCY_MISMATCH",
+  "merchantOrderId": "DEMO-CURRENCY",
+  "paypalOrderId": "PP-DEMO-CURRENCY",
+  "captureId": "CAP-DEMO-CURRENCY",
+  "expectedAmount": "100.00",
+  "actualAmount": "100.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "EUR",
+  "matchedTransactionCount": 1,
+  "explanation": "Expected currency differs from the captured PayPal currency.",
+  "evidence": [
+    {"captureId":"CAP-DEMO-CURRENCY","paypalOrderId":"PP-DEMO-CURRENCY","merchantOrderId":"DEMO-CURRENCY","amount":"100.00","currency":"EUR","status":"COMPLETED","capturedAt":"2026-10-01T12:02:00"}
+  ],
+  "modelOutput": "{\"summary\":\"Order DEMO-CURRENCY expected currency USD but capture CAP-DEMO-CURRENCY shows EUR.\",\"possibleExplanations\":[\"Root cause cannot be determined from the available evidence.\"],\"recommendedChecks\":[\"Check the create-order request logs for the currency sent to PayPal for order DEMO-CURRENCY\",\"Open capture CAP-DEMO-CURRENCY in PayPal and read its currency\",\"Check the checkout currency settings for this customer's region\",\"Check the currency field mapping in the ingestion job\"],\"requiresHumanReview\":true}"
+}

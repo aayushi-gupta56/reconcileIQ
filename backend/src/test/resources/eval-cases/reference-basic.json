@@ -1,0 +1,17 @@
+{
+  "id": "reference-basic",
+  "status": "REFERENCE_MISMATCH",
+  "merchantOrderId": "DEMO-REF",
+  "paypalOrderId": "PP-DEMO-REF",
+  "captureId": "CAP-DEMO-REF",
+  "expectedAmount": "100.00",
+  "actualAmount": "100.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "One or more PayPal transactions contain references that do not match this merchant order.",
+  "evidence": [
+    {"captureId":"CAP-DEMO-REF","paypalOrderId":"PP-DEMO-REF","merchantOrderId":"DEMO-REF-OTHER","amount":"100.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:04:00"}
+  ],
+  "modelOutput": "{\"summary\":\"Merchant order DEMO-REF and payment merchant reference DEMO-REF-OTHER conflict on PayPal order PP-DEMO-REF.\",\"possibleExplanations\":[\"Root cause cannot be determined from the available evidence.\"],\"recommendedChecks\":[\"Read the PayPal order ID stored against merchant order DEMO-REF in the merchant system\",\"Read the custom_id on PayPal order PP-DEMO-REF\",\"Check create-order request logs for DEMO-REF\",\"Check whether DEMO-REF was retried\"],\"requiresHumanReview\":true}"
+}
