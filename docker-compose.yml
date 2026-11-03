@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: reconcileiq-postgres
+    environment:
+      POSTGRES_DB: reconcileiq
+      POSTGRES_USER: reconcileiq
+      POSTGRES_PASSWORD: local_dev_only_change_me
+    ports:
+      - "5433:5432"
+    volumes:
+      - reconcileiq_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reconcileiq -d reconcileiq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  reconcileiq_pgdata:

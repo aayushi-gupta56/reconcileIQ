@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: reconcileiq-api
+  datasource:
+    url: jdbc:postgresql://localhost:5433/reconcileiq
+    username: reconcileiq
+    password: local_dev_only_change_me
+  jpa:
+    properties:
+      hibernate.jdbc.time_zone: UTC
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+paypal:
+  base-url: ${PAYPAL_BASE_URL}
+  client-id: ${PAYPAL_CLIENT_ID}
+  client-secret: ${PAYPAL_CLIENT_SECRET}
+
+ai:
+  provider: ollama
+  ollama:
+    base-url: http://localhost:11434
+    model: qwen3:8b
+    timeout-seconds: 120
