@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import type { ColDef, RowClickedEvent } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import { paypal, reconcileGridTheme } from "./gridTheme";
 
 import InvestigationPanel from "./InvestigationPanel";
 import "./ReconciliationDashboard.css";
@@ -17,14 +17,25 @@ import {
   type ReconciliationRun,
 } from "./api";
 
-const statusColors: Record<string, string> = {
-  MATCHED: "#16a34a",
-  MISSING_PAYMENT: "#d97706",
-  AMOUNT_MISMATCH: "#dc2626",
-  CURRENCY_MISMATCH: "#dc2626",
-  DUPLICATE_PAYMENT: "#9333ea",
-  REFERENCE_MISMATCH: "#ea580c",
-  UNEXPECTED_PAYMENT: "#dc2626",
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Status -> [text colour, background tint], all derived from the PayPal palette
+const statusColors: Record<string, [string, string]> = {
+  MATCHED: [paypal.success, "#E3F5EB"],
+  MISSING_PAYMENT: [paypal.warning, "#FFF1CC"],
+  AMOUNT_MISMATCH: [paypal.danger, "#FCE8E8"],
+  CURRENCY_MISMATCH: [paypal.danger, "#FCE8E8"],
+  DUPLICATE_PAYMENT: [paypal.navy, "#E4EAF7"],
+  REFERENCE_MISMATCH: [paypal.blue, "#E5F0FC"],
+  UNEXPECTED_PAYMENT: ["#006C93", "#DDF2FA"],
+};
+
+const REVIEW_COPY: Record<string, string> = {
+  PENDING: "Pending",
+  UNREVIEWED: "Unreviewed",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  REVIEWED: "Reviewed",
 };
 
 function formatAmount(amount: number | null, currency: string | null) {
@@ -33,15 +44,28 @@ function formatAmount(amount: number | null, currency: string | null) {
 }
 
 function StatusCell(props: { value: string }) {
-  const color = statusColors[props.value] ?? "#64748b";
+  const [color, background] = statusColors[props.value] ?? [paypal.slate, paypal.surface];
   return (
-    <span
-      className="status"
-      style={{ color, background: `${color}18` }}
-    >
+    <span className="status" style={{ color, background }}>
+      <i className="status-dot" style={{ background: color }} />
       {(props.value ?? "").replaceAll("_", " ")}
     </span>
   );
+}
+
+function ReviewCell(props: { value: string | null }) {
+  if (!props.value) return <span className="cell-muted">-</span>;
+  const key = props.value.toUpperCase();
+  return (
+    <span className={`review-pill ${key.toLowerCase()}`}>
+      {REVIEW_COPY[key] ?? props.value.replaceAll("_", " ")}
+    </span>
+  );
+}
+
+function IdCell(props: { value: string | null }) {
+  if (!props.value) return <span className="cell-muted">-</span>;
+  return <span className="cell-id" title={props.value}>{props.value}</span>;
 }
 
 function SourceCell(props: { value: string }) {
@@ -115,27 +139,35 @@ export default function ReconciliationDashboard({ onCreateOrder }: Props) {
 
   const columnDefs = useMemo<ColDef<ReconciliationResult>[]>(
     () => [
-      { field: "merchantOrderId", headerName: "Merchant order", filter: true, sortable: true, flex: 1 },
-      { field: "paypalOrderId", headerName: "PayPal order", filter: true, sortable: true, flex: 1 },
-      { field: "status", headerName: "Status", filter: true, sortable: true, cellRenderer: StatusCell, width: 180 },
+      { field: "merchantOrderId", headerName: "Merchant order", cellRenderer: IdCell, flex: 1.2, minWidth: 170 },
+      { field: "paypalOrderId", headerName: "PayPal order", cellRenderer: IdCell, flex: 1.2, minWidth: 170 },
+      { field: "status", headerName: "Status", cellRenderer: StatusCell, minWidth: 210 },
       {
         headerName: "Expected",
-        filter: true,
-        sortable: true,
+        type: "rightAligned",
+        cellClass: "cell-amount",
+        minWidth: 140,
         valueGetter: (params) =>
           formatAmount(params.data?.expectedAmount ?? null, params.data?.expectedCurrency ?? null),
       },
       {
         headerName: "Actual",
-        filter: true,
-        sortable: true,
+        type: "rightAligned",
+        cellClass: "cell-amount",
+        minWidth: 140,
         valueGetter: (params) =>
           formatAmount(params.data?.actualAmount ?? null, params.data?.actualCurrency ?? null),
       },
-      { field: "expectedCurrency", headerName: "Currency", filter: true, sortable: true, width: 110 },
-      { field: "source", headerName: "Source", filter: true, sortable: true, cellRenderer: SourceCell, width: 120 },
-      { field: "reviewStatus", headerName: "Review", filter: true, sortable: true, width: 150 },
-      { field: "createdAt", headerName: "Created", filter: true, sortable: true, width: 180 },
+      { field: "expectedCurrency", headerName: "Currency", width: 120 },
+      { field: "source", headerName: "Source", cellRenderer: SourceCell, width: 130 },
+      { field: "reviewStatus", headerName: "Review", cellRenderer: ReviewCell, width: 150 },
+      {
+        field: "createdAt",
+        headerName: "Created",
+        minWidth: 190,
+        valueFormatter: (params) =>
+          params.value ? new Date(params.value).toLocaleString() : "-",
+      },
     ],
     []
   );
@@ -236,9 +268,9 @@ export default function ReconciliationDashboard({ onCreateOrder }: Props) {
       {selectedRun && (
         <section className="summary-grid">
           <SummaryCard label="Total orders" value={stats.orders} />
-          <SummaryCard label="Matched" value={stats.matched} color="#16a34a" />
-          <SummaryCard label="Discrepancies" value={stats.discrepancies} color="#dc2626" />
-          <SummaryCard label="Unexpected payments" value={stats.unexpected} color="#d97706" />
+          <SummaryCard label="Matched" value={stats.matched} color={paypal.success} />
+          <SummaryCard label="Discrepancies" value={stats.discrepancies} color={paypal.danger} />
+          <SummaryCard label="Unexpected payments" value={stats.unexpected} color={paypal.warning} />
         </section>
       )}
 
@@ -263,12 +295,17 @@ export default function ReconciliationDashboard({ onCreateOrder }: Props) {
               onCreateOrder={onCreateOrder}
             />
           ) : (
-            <div className="ag-theme-quartz results-grid">
+            <div className="results-grid">
               <AgGridReact<ReconciliationResult>
+                theme={reconcileGridTheme}
+                domLayout="autoHeight"
                 rowData={visibleResults}
                 columnDefs={columnDefs}
-                defaultColDef={{ resizable: true, filter: true, sortable: true }}
-                rowSelection="single"
+                defaultColDef={{ resizable: true, filter: true, sortable: true, minWidth: 110 }}
+                rowSelection={{ mode: "singleRow", checkboxes: false, enableClickSelection: true }}
+                pagination
+                paginationPageSize={10}
+                paginationPageSizeSelector={[10, 25, 50]}
                 animateRows
                 onRowClicked={(event: RowClickedEvent<ReconciliationResult>) => {
                   if (event.data) setSelectedResult(event.data);
@@ -319,7 +356,7 @@ export default function ReconciliationDashboard({ onCreateOrder }: Props) {
 function SummaryCard({
   label,
   value,
-  color = "#1e293b",
+  color = paypal.ink,
 }: {
   label: string;
   value: number;

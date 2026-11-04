@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import PaymentReturn from "./PaymentReturn"
+import PaymentReturn, { PaymentCancelled } from "./PaymentReturn"
 import ReconciliationDashboard from "./ReconciliationDashboard"
 import "./ReconciliationDashboard.css"
 import CreateOrder from "./CreateOrder"
@@ -29,13 +29,7 @@ export default function App() {
   }
 
   if (window.location.pathname === "/payment/cancel") {
-    return (
-      <main>
-        <h1>Payment cancelled</h1>
-        <p>No successful capture has been confirmed.</p>
-        <a href="/">Return to ReconcileIQ</a>
-      </main>
-    )
+    return <PaymentCancelled />
   }
 
   if (showDashboard) {

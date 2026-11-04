@@ -184,3 +184,19 @@
   .investigation-error p {
     font-size: 13px;
   }
+  .rerun-box {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px dashed #b3c6e7;
+    border-radius: 10px;
+    background: #f5f9ff;
+  }
+
+  .rerun-box p {
+    margin: 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+  }

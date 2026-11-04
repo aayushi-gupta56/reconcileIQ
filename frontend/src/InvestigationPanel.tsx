@@ -26,6 +26,8 @@ export default function InvestigationPanel({
   const [note, setNote] = useState("");
 
   const report = history[0] ?? null;
+  // A dismissed report is closed, so the analyst can ask the AI for a fresh one.
+  const canRerun = report?.status === "DISMISSED";
 
   useEffect(() => {
     if (!result || result.status === "MATCHED") {
@@ -54,6 +56,7 @@ export default function InvestigationPanel({
     try {
       const created = await investigateResult(result.id);
       setHistory((current) => [created, ...current]);
+      setNote("");
       onReviewed();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Investigation failed");
@@ -113,7 +116,7 @@ export default function InvestigationPanel({
             </div>
           )}
 
-          {error && (
+          {error && !report && (
             <div className="investigation-error">
               <strong>Request failed</strong>
               <p>{error}</p>
@@ -194,6 +197,27 @@ export default function InvestigationPanel({
                   {report.status} by {report.reviewedBy}
                   {report.reviewNote ? ` — ${report.reviewNote}` : ""}
                 </p>
+              )}
+              {canRerun && (
+                <div className="rerun-box">
+                  <p>
+                    This investigation was dismissed. Run the AI again to get a
+                    fresh analysis; the dismissed report stays in the history.
+                  </p>
+                  <button
+                    className="run-button"
+                    onClick={handleInvestigate}
+                    disabled={loading}
+                  >
+                    {loading ? "Analysing…" : "↻ Re-run investigation"}
+                  </button>
+                </div>
+              )}
+              {error && (
+                <div className="investigation-error">
+                  <strong>Request failed</strong>
+                  <p>{error}</p>
+                </div>
               )}
               {history.length > 1 && (
                 <section className="report-section">

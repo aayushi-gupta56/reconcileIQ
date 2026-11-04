@@ -25,7 +25,7 @@ public class OllamaInvestigationClient implements AiInvestigationClient {
         this.mapper = mapper;
         this.ai = properties.getAi();
         this.http = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(Math.min(30, ai.getTimeoutSeconds())))
+                .connectTimeout(Duration.ofMinutes(5))
                 .build();
     }
 
@@ -45,7 +45,7 @@ public class OllamaInvestigationClient implements AiInvestigationClient {
             );
 
             HttpRequest request = HttpRequest.newBuilder(URI.create(trimSlash(ai.getBaseUrl()) + "/api/chat"))
-                    .timeout(Duration.ofSeconds(ai.getTimeoutSeconds()))
+                    .timeout(Duration.ofMinutes(5))
                     .header("Content-Type", "application/json")
                     .POST(BodyPublishers.ofString(mapper.writeValueAsString(body)))
                     .build();
