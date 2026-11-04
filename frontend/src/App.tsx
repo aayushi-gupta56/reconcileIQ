@@ -9,7 +9,10 @@ type Health = { status: string; application: string }
 export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
   const [apiError, setApiError] = useState('')
-  const [showDashboard, setShowDashboard] = useState(false)
+  // Emailed links use /?view=dashboard&run=<id> to open the dashboard directly.
+  const [showDashboard, setShowDashboard] = useState(
+    () => new URLSearchParams(window.location.search).get('view') === 'dashboard'
+  )
   const [showCreateOrder, setShowCreateOrder] = useState(false)
 
   useEffect(() => {

@@ -211,7 +211,10 @@ export default function ReconciliationDashboard({ onCreateOrder }: Props) {
       .then(async (data) => {
         setRuns(data);
         if (data.length > 0) {
-          await selectRun(data[0]);
+          // ?run=<id> (from the notification email) opens that specific run.
+          const wantedId = Number(new URLSearchParams(window.location.search).get("run"));
+          const wanted = wantedId > 0 ? data.find((run) => run.id === wantedId) : undefined;
+          await selectRun(wanted ?? data[0]);
         }
       })
       .catch((err) => {
