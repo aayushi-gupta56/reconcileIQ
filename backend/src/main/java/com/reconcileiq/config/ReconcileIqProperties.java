@@ -13,6 +13,8 @@ public class ReconcileIqProperties {
 
     private final Ai ai = new Ai();
 
+    private final Notifications notifications = new Notifications();
+
     public DataSourceMode getDataSource() {
         return dataSource;
     }
@@ -23,6 +25,10 @@ public class ReconcileIqProperties {
 
     public Ai getAi() {
         return ai;
+    }
+
+    public Notifications getNotifications() {
+        return notifications;
     }
 
     public static class Ai {
@@ -90,6 +96,30 @@ public class ReconcileIqProperties {
 
         public void setApiKey(String apiKey) {
             this.apiKey = apiKey;
+        }
+    }
+
+    public static class Notifications {
+        /** Zapier "Catch Hook" URL. Leave blank to disable notifications. */
+        private String zapierWebhookUrl = "";
+
+        /** Public base URL of the hosted dashboard, used for the link in the email. */
+        private String dashboardUrl = "http://localhost:5173";
+
+        public String getZapierWebhookUrl() {
+            return zapierWebhookUrl;
+        }
+
+        public void setZapierWebhookUrl(String zapierWebhookUrl) {
+            this.zapierWebhookUrl = zapierWebhookUrl == null ? "" : zapierWebhookUrl;
+        }
+
+        public String getDashboardUrl() {
+            return dashboardUrl;
+        }
+
+        public void setDashboardUrl(String dashboardUrl) {
+            this.dashboardUrl = dashboardUrl == null ? "" : dashboardUrl;
         }
     }
 }
