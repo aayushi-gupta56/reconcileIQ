@@ -9,4 +9,6 @@ public interface InvestigationReportRepository
     List<InvestigationReport> findByReconciliationResultIdOrderByCreatedAtDesc(
             Long reconciliationResultId
     );
+
+    List<InvestigationReport> findByReconciliationResultIdIn(List<Long> reconciliationResultIds);
 }

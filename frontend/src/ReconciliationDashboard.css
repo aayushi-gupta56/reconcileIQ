@@ -35,6 +35,31 @@
     color: #64748b;
     margin: 0;
   }
+
+  .source-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    width: 0;
+    height: 0;
+  }
+
+  .source-badge.compact {
+    margin-top: 0;
+    font-size: 11px;
+  }
+
+  .source-badge.demo {
+    color: #1d4ed8;
+    background: #dbeafe;
+  }
+
+  .source-badge.sandbox {
+    color: #166534;
+    background: #dcfce7;
+  }
   
   .run-button {
     border: none;
@@ -76,6 +101,18 @@
     font-size: 30px;
   }
   
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .results-grid {
+    height: 520px;
+    width: 100%;
+  }
+
   .results-section,
   .history-section {
     margin-top: 32px;
@@ -213,6 +250,10 @@
     .summary-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .workspace {
+      grid-template-columns: 1fr;
+    }
   }
   
   @media (max-width: 450px) {
@@ -226,7 +267,7 @@
     }
   }
 
-  v.investigate-button {
+  .investigate-button {
     padding: 7px 12px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
@@ -244,3 +285,130 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+/* ───────── PayPal-themed results grid ───────── */
+
+.results-section {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #e6eaee;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 28, 100, 0.04), 0 8px 24px rgba(0, 28, 100, 0.05);
+}
+
+.results-section .section-heading {
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.results-section .section-heading h2 {
+  color: #003087;
+  font-size: 20px;
+  letter-spacing: -0.2px;
+}
+
+.results-section .result-count {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #e5f0fc;
+  color: #003087;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.results-grid {
+  width: 100%;
+  min-height: 200px;
+}
+
+/* status pill */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* ids, amounts, muted */
+.cell-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: #2c2e2f;
+}
+
+.cell-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.cell-muted {
+  color: #9aa3a6;
+}
+
+/* review pill */
+.review-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: #f5f7fa;
+  color: #687173;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.review-pill.approved,
+.review-pill.reviewed {
+  background: #e3f5eb;
+  color: #0b7a43;
+}
+
+.review-pill.rejected {
+  background: #fce8e8;
+  color: #c72e2e;
+}
+
+.review-pill.pending,
+.review-pill.unreviewed {
+  background: #fff1cc;
+  color: #9a5b00;
+}
+
+/* source badge recoloured to PayPal blues */
+.source-badge.demo {
+  color: #003087;
+  background: #e4eaf7;
+}
+
+.source-badge.sandbox {
+  color: #006c93;
+  background: #ddf2fa;
+}
+
+/* brand accents on the rest of the dashboard chrome */
+.run-button {
+  background: #003087;
+  transition: background 0.15s ease;
+}
+
+.run-button:hover:not(:disabled) {
+  background: #0070e0;
+}
+
+.dashboard-tab.active {
+  color: #003087;
+  border-bottom-color: #0070e0;
+}

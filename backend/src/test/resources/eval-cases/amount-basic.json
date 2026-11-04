@@ -1,0 +1,17 @@
+{
+  "id": "amount-basic",
+  "status": "AMOUNT_MISMATCH",
+  "merchantOrderId": "DEMO-AMOUNT",
+  "paypalOrderId": "PP-DEMO-AMOUNT",
+  "captureId": "CAP-DEMO-AMOUNT",
+  "expectedAmount": "100.00",
+  "actualAmount": "90.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "Expected amount differs from the captured PayPal amount.",
+  "evidence": [
+    {"captureId":"CAP-DEMO-AMOUNT","paypalOrderId":"PP-DEMO-AMOUNT","merchantOrderId":"DEMO-AMOUNT","amount":"90.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T12:01:00"}
+  ],
+  "modelOutput": "{\"summary\":\"Order DEMO-AMOUNT expected 100.00 USD but capture CAP-DEMO-AMOUNT shows 90.00 USD.\",\"possibleExplanations\":[\"Root cause cannot be determined from the available evidence.\"],\"recommendedChecks\":[\"Confirm the order total in the merchant system at checkout time\",\"Open capture CAP-DEMO-AMOUNT in PayPal and verify the gross captured amount\",\"Check whether the order was edited after PayPal order PP-DEMO-AMOUNT was created\"],\"requiresHumanReview\":true}"
+}

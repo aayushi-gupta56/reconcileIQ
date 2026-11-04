@@ -1,0 +1,17 @@
+{
+  "id": "reference-malformed",
+  "status": "REFERENCE_MISMATCH",
+  "merchantOrderId": "MO-REF-2",
+  "paypalOrderId": "PP-REF-2",
+  "captureId": "CAP-REF-2",
+  "expectedAmount": "15.00",
+  "actualAmount": "15.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "One or more PayPal transactions contain references that do not match this merchant order.",
+  "evidence": [
+    {"captureId":"CAP-REF-2","paypalOrderId":"PP-REF-2","merchantOrderId":"MO-REF-WRONG","amount":"15.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T18:00:00"}
+  ],
+  "modelOutput": "```json\nnot an object\n```"
+}

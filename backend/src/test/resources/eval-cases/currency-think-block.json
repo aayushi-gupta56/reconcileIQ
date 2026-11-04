@@ -1,0 +1,17 @@
+{
+  "id": "currency-think-block",
+  "status": "CURRENCY_MISMATCH",
+  "merchantOrderId": "MO-CUR-2",
+  "paypalOrderId": "PP-CUR-2",
+  "captureId": "CAP-CUR-2",
+  "expectedAmount": "40.00",
+  "actualAmount": "40.00",
+  "expectedCurrency": "USD",
+  "actualCurrency": "GBP",
+  "matchedTransactionCount": 1,
+  "explanation": "Expected currency differs from the captured PayPal currency.",
+  "evidence": [
+    {"captureId":"CAP-CUR-2","paypalOrderId":"PP-CUR-2","merchantOrderId":"MO-CUR-2","amount":"40.00","currency":"GBP","status":"COMPLETED","capturedAt":"2026-10-01T13:00:00"}
+  ],
+  "modelOutput": "<think>I will copy A3</think>```json\n{\"summary\":\"Order MO-CUR-2 expected USD but capture CAP-CUR-2 shows GBP.\",\"possibleExplanations\":[\"Root cause cannot be determined from the available evidence.\"],\"recommendedChecks\":[\"Check create-order logs for MO-CUR-2\",\"Open CAP-CUR-2 in PayPal\",\"Check store currency settings\"],\"requiresHumanReview\":true}\n```"
+}

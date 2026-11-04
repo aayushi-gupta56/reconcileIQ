@@ -1,0 +1,14 @@
+{
+  "id": "unexpected-invented-id",
+  "status": "UNEXPECTED_PAYMENT",
+  "paypalOrderId": "PP-UNEXP-2",
+  "captureId": "CAP-UNEXP-2",
+  "actualAmount": "12.00",
+  "actualCurrency": "USD",
+  "matchedTransactionCount": 1,
+  "explanation": "PayPal transaction has no corresponding merchant order.",
+  "evidence": [
+    {"captureId":"CAP-UNEXP-2","paypalOrderId":"PP-UNEXP-2","amount":"12.00","currency":"USD","status":"COMPLETED","capturedAt":"2026-10-01T16:00:00"}
+  ],
+  "modelOutput": "{\"summary\":\"PayPal order P5 has no merchant order.\",\"possibleExplanations\":[\"The order may belong to another store.\"],\"recommendedChecks\":[\"Open P5 and C5 in PayPal\",\"Search ingestion for P5\",\"Check another channel\"],\"requiresHumanReview\":true}"
+}

@@ -32,6 +32,9 @@ public class ReconciliationResult {
     @Column(columnDefinition = "TEXT")
     private String explanation;
 
+    @Column(nullable = false, length = 20)
+    private String source = "DEMO";
+
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -129,6 +132,14 @@ public class ReconciliationResult {
 
     public void setExplanation(String explanation) {
         this.explanation = explanation;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public LocalDateTime getCreatedAt() {

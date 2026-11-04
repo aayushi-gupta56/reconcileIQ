@@ -1,20 +1,57 @@
-.investigation-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(10, 15, 25, 0.55);
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  .investigation-panel {
-    width: min(560px, 100%);
-    height: 100%;
+.investigation-panel.embedded {
+    width: 100%;
+    min-height: 520px;
     overflow-y: auto;
     background: #fff;
     color: #172033;
-    padding: 32px;
-    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.15);
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+  }
+
+  .fallback-banner {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #fff7ed;
+    color: #9a3412;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .review-form {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .review-form input,
+  .review-form textarea {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+  }
+
+  .review-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dismiss-button {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 13px 20px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .model-meta,
+  .review-history {
+    color: #64748b;
+    font-size: 12px;
   }
   
   .investigation-header {
@@ -146,4 +183,265 @@
   
   .investigation-error p {
     font-size: 13px;
+  }
+
+  /* ───────── PayPal-themed panel accents ───────── */
+
+  .investigation-panel {
+    box-shadow: 0 1px 2px rgba(0, 28, 100, 0.04), 0 8px 24px rgba(0, 28, 100, 0.05);
+    border-color: #e6eaee !important;
+    border-radius: 16px !important;
+  }
+
+  .investigation-panel .eyebrow {
+    color: #0070e0;
+  }
+
+  .investigation-header h2 {
+    color: #003087;
+  }
+
+  .investigation-panel .report-section h3 {
+    color: #003087;
+  }
+
+  .investigation-panel .recommendation {
+    background: #f5f9ff;
+    border: 1px solid #dbe7f7;
+  }
+
+  /* status pills (shared by history and report header) */
+  .state-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    background: #f5f7fa;
+    color: #687173;
+  }
+
+  .state-pill.pending   { background: #fff1cc; color: #9a5b00; }
+  .state-pill.approved  { background: #e3f5eb; color: #0b7a43; }
+  .state-pill.dismissed { background: #fce8e8; color: #c72e2e; }
+  .state-pill.info      { background: #e5f0fc; color: #0070e0; }
+  .state-pill.muted     { background: #f5f7fa; color: #687173; }
+
+  /* history timeline */
+  .history-panel {
+    margin-bottom: 20px;
+    border: 1px solid #e6eaee;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .history-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    border: none;
+    background: #f5f7fa;
+    color: #003087;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .history-toggle > span:first-child {
+    flex: 1;
+  }
+
+  .history-count {
+    min-width: 22px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #003087;
+    color: #fff;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .history-chevron {
+    color: #687173;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .history-item:hover {
+    background: #eef5fd;
+  }
+
+  .history-item.active {
+    border-color: #0070e0;
+    background: #f5f9ff;
+  }
+
+  .history-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: #9aa3a6;
+  }
+
+  .history-dot.pending   { background: #ffc439; }
+  .history-dot.approved  { background: #0b7a43; }
+  .history-dot.dismissed { background: #c72e2e; }
+  .history-dot.info      { background: #0070e0; }
+
+  .history-main {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .history-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2c2e2f;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .latest-tag {
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: #e5f0fc;
+    color: #003087;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .history-sub {
+    color: #687173;
+    font-size: 12px;
+  }
+
+  .history-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .history-tags .tag {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #f5f7fa;
+    color: #687173;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .history-tags .tag.warn {
+    background: #fff1cc;
+    color: #9a5b00;
+  }
+
+  /* viewing an older report */
+  .older-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid #dbe7f7;
+    border-radius: 10px;
+    background: #f5f9ff;
+    color: #003087;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .link-button {
+    border: none;
+    background: none;
+    color: #0070e0;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .link-button:hover {
+    text-decoration: underline;
+  }
+
+  /* regenerate */
+  .regen-bar {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px dashed #b3c6e7;
+    border-radius: 10px;
+    background: #f5f9ff;
+  }
+
+  .regen-bar p {
+    margin: 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .regen-button {
+    justify-self: start;
+    padding: 11px 18px;
+    border: 1.5px solid #003087;
+    border-radius: 8px;
+    background: #fff;
+    color: #003087;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .regen-button:hover:not(:disabled) {
+    background: #003087;
+    color: #fff;
+  }
+
+  .regen-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .review-form input:focus,
+  .review-form textarea:focus {
+    outline: none;
+    border-color: #0070e0;
+    box-shadow: 0 0 0 3px rgba(0, 112, 224, 0.2);
   }

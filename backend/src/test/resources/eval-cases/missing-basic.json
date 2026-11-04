@@ -1,0 +1,12 @@
+{
+  "id": "missing-basic",
+  "status": "MISSING_PAYMENT",
+  "merchantOrderId": "DEMO-MISSING",
+  "paypalOrderId": "PP-DEMO-MISSING",
+  "expectedAmount": "100.00",
+  "expectedCurrency": "USD",
+  "matchedTransactionCount": 0,
+  "explanation": "No PayPal transaction was found for this merchant order.",
+  "evidence": [],
+  "modelOutput": "{\"summary\":\"No payment record matching merchant order DEMO-MISSING was found in the supplied dataset.\",\"possibleExplanations\":[\"The transaction may not have been ingested or synchronised into the dataset.\"],\"recommendedChecks\":[\"Look up PayPal order PP-DEMO-MISSING in the PayPal dashboard and read its status and captures\",\"Check sync and ingestion job logs for failures around this order's creation time\",\"Check webhook delivery logs for events on PayPal order PP-DEMO-MISSING\"],\"requiresHumanReview\":true}"
+}

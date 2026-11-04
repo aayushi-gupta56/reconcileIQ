@@ -10,7 +10,7 @@ public class PayPalConfig {
 
     @Bean
     public RestClient paypalRestClient(
-            @Value("${paypal.base-url}") String baseUrl) {
+            @Value("${paypal.base-url:https://api-m.sandbox.paypal.com}") String baseUrl) {
 
         return RestClient.builder()
                 .baseUrl(baseUrl)
