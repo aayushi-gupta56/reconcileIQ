@@ -1,21 +1,27 @@
+
 spring:
   application:
     name: reconcileiq-api
+
   datasource:
-    url: jdbc:postgresql://localhost:5433/reconcileiq
-    username: reconcileiq
-    password: local_dev_only_change_me
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/reconcileiq}
+    username: ${DB_USERNAME:reconcileiq}
+    password: ${DB_PASSWORD:local_dev_only_change_me}
+
   jpa:
     properties:
-      hibernate.jdbc.time_zone: UTC
+      hibernate:
+        jdbc:
+          time_zone: UTC
     hibernate:
       ddl-auto: validate
     open-in-view: false
+
   flyway:
     enabled: true
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 management:
   endpoints:
@@ -31,22 +37,25 @@ paypal:
 ai:
   provider: ollama
   ollama:
-    base-url: http://localhost:11434
+    base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
     model: qwen3:8b
     timeout-seconds: 120
 
 reconcileiq:
   data-source: ${RECONCILEIQ_DATA_SOURCE:DEMO_SCENARIOS}
+
   ai:
     provider: ${RECONCILEIQ_AI_PROVIDER:OLLAMA}
     base-url: ${RECONCILEIQ_AI_BASE_URL:http://localhost:11434}
     model: ${RECONCILEIQ_AI_MODEL:qwen3:8b}
     temperature: 0.1
-    timeout-seconds: 60
+    timeout-seconds: ${RECONCILEIQ_AI_TIMEOUT_SECONDS:60}
     prompt-version: v1
     api-key: ${RECONCILEIQ_AI_API_KEY:}
+
   notifications:
-    # Zapier "Catch Hook" URL. Leave empty to disable the run-completed email.
+    # Zapier Catch Hook URL. Empty disables notifications.
     zapier-webhook-url: ${ZAPIER_WEBHOOK_URL:}
-    # Public URL of the hosted dashboard, used for the "View reconciliation report" link.
+
+    # Public URL of the hosted dashboard.
     dashboard-url: ${RECONCILEIQ_DASHBOARD_URL:http://localhost:5173}
