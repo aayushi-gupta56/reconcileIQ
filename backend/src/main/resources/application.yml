@@ -45,3 +45,8 @@ reconcileiq:
     timeout-seconds: 60
     prompt-version: v1
     api-key: ${RECONCILEIQ_AI_API_KEY:}
+  notifications:
+    # Zapier "Catch Hook" URL. Leave empty to disable the run-completed email.
+    zapier-webhook-url: ${ZAPIER_WEBHOOK_URL:}
+    # Public URL of the hosted dashboard, used for the "View reconciliation report" link.
+    dashboard-url: ${RECONCILEIQ_DASHBOARD_URL:http://localhost:5173}
