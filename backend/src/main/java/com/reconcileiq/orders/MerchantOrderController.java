@@ -9,7 +9,6 @@ import static com.reconcileiq.orders.OrderDtos.*;
 
 @RestController
 @RequestMapping("/api/v1/orders")
-@CrossOrigin(origins = "http://localhost:5173")
 public class MerchantOrderController {
 
     private final MerchantOrderService orderService;
