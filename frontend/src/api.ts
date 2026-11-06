@@ -1,3 +1,14 @@
+// Backend origin, e.g. https://reconcileiq-l2wi.onrender.com (no trailing slash).
+// When VITE_API_BASE_URL is unset/empty, URLs stay relative ("/api/...") so the
+// Vite dev-server proxy (/api -> http://localhost:8080) keeps working locally.
+const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL ?? "")
+  .trim()
+  .replace(/\/+$/, "");
+
+export function apiUrl(path: string): string {
+  return `${API_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 const API_BASE_URL = "/api/v1";
 
 export interface AppConfig {
@@ -8,7 +19,7 @@ export interface AppConfig {
 }
 
 export async function getAppConfig(): Promise<AppConfig> {
-  const response = await fetch("/api/config");
+  const response = await fetch(apiUrl("/api/config"));
   return handleResponse<AppConfig>(response);
 }
 
@@ -50,14 +61,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export async function runReconciliation(): Promise<ReconciliationRun> {
-  const response = await fetch(`${API_BASE_URL}/reconciliation/run`, {
+  const response = await fetch(apiUrl(`${API_BASE_URL}/reconciliation/run`), {
     method: "POST",
   });
   return handleResponse<ReconciliationRun>(response);
 }
 
 export async function getReconciliationRuns(): Promise<ReconciliationRun[]> {
-  const response = await fetch(`${API_BASE_URL}/reconciliation/runs`);
+  const response = await fetch(apiUrl(`${API_BASE_URL}/reconciliation/runs`));
   return handleResponse<ReconciliationRun[]>(response);
 }
 
@@ -65,7 +76,7 @@ export async function getReconciliationResults(
   runId: number
 ): Promise<ReconciliationResult[]> {
   const response = await fetch(
-    `${API_BASE_URL}/reconciliation/runs/${runId}/results`
+    apiUrl(`${API_BASE_URL}/reconciliation/runs/${runId}/results`)
   );
   return handleResponse<ReconciliationResult[]>(response);
 }
@@ -93,7 +104,7 @@ export async function investigateResult(
   resultId: number
 ): Promise<InvestigationReport> {
   const response = await fetch(
-    `/api/v1/reconciliation/results/${resultId}/investigate`,
+    apiUrl(`/api/v1/reconciliation/results/${resultId}/investigate`),
     { method: "POST" }
   );
   return handleResponse<InvestigationReport>(response);
@@ -103,7 +114,7 @@ export async function getInvestigations(
   resultId: number
 ): Promise<InvestigationReport[]> {
   const response = await fetch(
-    `/api/v1/reconciliation/results/${resultId}/investigations`
+    apiUrl(`/api/v1/reconciliation/results/${resultId}/investigations`)
   );
   return handleResponse<InvestigationReport[]>(response);
 }
@@ -114,7 +125,7 @@ export async function reviewInvestigation(
   reviewer: string,
   note: string
 ): Promise<InvestigationReport> {
-  const response = await fetch(`/api/investigations/${id}/${action}`, {
+  const response = await fetch(apiUrl(`/api/investigations/${id}/${action}`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reviewer, note }),
@@ -148,7 +159,7 @@ export async function createMerchantOrder(
   amount: number,
   currency: string
 ): Promise<MerchantOrder> {
-  const response = await fetch('/api/v1/orders', {
+  const response = await fetch(apiUrl('/api/v1/orders'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount, currency }),
@@ -162,7 +173,7 @@ export async function createMerchantOrder(
 }
 
 export async function listMerchantOrders(): Promise<MerchantOrder[]> {
-  const response = await fetch('/api/v1/orders')
+  const response = await fetch(apiUrl('/api/v1/orders'))
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Failed to load orders'))
