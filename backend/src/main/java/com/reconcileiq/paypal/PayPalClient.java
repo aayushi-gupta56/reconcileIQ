@@ -24,17 +24,24 @@ public class PayPalClient {
     private final RestClient client;
     private final String clientId;
     private final String clientSecret;
+    private final String frontendBaseUrl;
     private static final Logger log =
         LoggerFactory.getLogger(PayPalClient.class);
 
     public PayPalClient(
             RestClient paypalRestClient,
             @Value("${paypal.client-id:}") String clientId,
-            @Value("${paypal.client-secret:}") String clientSecret) {
+            @Value("${paypal.client-secret:}") String clientSecret,
+            @Value("${reconcileiq.notifications.dashboard-url:http://localhost:5173}")
+            String frontendBaseUrl) {
 
         this.client = paypalRestClient;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        // Public frontend origin used for PayPal return/cancel redirects.
+        this.frontendBaseUrl = frontendBaseUrl == null || frontendBaseUrl.isBlank()
+                ? "http://localhost:5173"
+                : frontendBaseUrl.trim().replaceAll("/+$", "");
     }
 
     public String getAccessToken() {
@@ -107,9 +114,9 @@ public class PayPalClient {
                         "paypal", Map.of(
                                 "experience_context", Map.of(
                                         "return_url",
-                                        "http://localhost:5173/payment/return",
+                                        frontendBaseUrl + "/payment/return",
                                         "cancel_url",
-                                        "http://localhost:5173/payment/cancel",
+                                        frontendBaseUrl + "/payment/cancel",
                                         "user_action", "PAY_NOW"
                                 )
                         )

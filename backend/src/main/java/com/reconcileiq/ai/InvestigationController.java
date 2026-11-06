@@ -7,7 +7,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reconciliation/results")
-@CrossOrigin(origins = "http://localhost:5173")
 public class InvestigationController {
 
     private final InvestigationService investigationService;
