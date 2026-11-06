@@ -3,6 +3,7 @@ import PaymentReturn, { PaymentCancelled } from "./PaymentReturn"
 import ReconciliationDashboard from "./ReconciliationDashboard"
 import "./ReconciliationDashboard.css"
 import CreateOrder from "./CreateOrder"
+import { apiUrl } from "./api"
 
 type Health = { status: string; application: string }
 
@@ -16,7 +17,7 @@ export default function App() {
   const [showCreateOrder, setShowCreateOrder] = useState(false)
 
   useEffect(() => {
-    fetch('/api/v1/health')
+    fetch(apiUrl('/api/v1/health'))
       .then((response) => {
         if (!response.ok) throw new Error(`API returned ${response.status}`)
         return response.json() as Promise<Health>

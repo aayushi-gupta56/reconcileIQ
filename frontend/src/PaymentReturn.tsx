@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, type ReactNode } from "react";
 import "./PaymentReturn.css";
+import { apiUrl } from "./api";
 
 type PaymentResult = {
   merchantOrderId?: string;
@@ -108,9 +109,9 @@ export default function PaymentReturn() {
     async function capturePayment() {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/v1/orders/${encodeURIComponent(
-            paypalOrderId!
-          )}/capture`,
+          apiUrl(
+            `/api/v1/orders/${encodeURIComponent(paypalOrderId!)}/capture`
+          ),
           { method: "POST" }
         );
 
