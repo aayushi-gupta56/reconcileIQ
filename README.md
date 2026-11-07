@@ -1,5 +1,5 @@
 # ReconcileIQ
-#The frontend and backend have been hosted on Render and are available at https://reconcileiq-frontend.onrender.com/ 
+The frontend and backend have been hosted on Render and are available at https://reconcileiq-frontend.onrender.com/ 
 The PostgreSQL DB has been hosted on Neon, but the LLM has not been hosted online and requires local setup of the application to run. However, the hosted versions use a deterministic fallback to avoid breaking the functionality. For a complete experience, please set up locally using the following steps - 
 
 ## 1. Prerequisites
